@@ -1,0 +1,52 @@
+plugins {
+    id 'scala'
+    id 'org.springframework.boot' version '3.2.4'
+    id 'io.gatling.gradle' version '3.10.5.1'
+}
+
+apply plugin: 'java'
+apply plugin: 'io.spring.dependency-management'
+
+group = "com.haw.srs"
+version = '0.0.1-SNAPSHOT'
+
+java {
+    sourceCompatibility = JavaVersion.VERSION_17
+}
+
+repositories {
+    mavenCentral()
+    maven { url "https://repo.spring.io/release" }
+}
+
+dependencies {
+
+    // compiletime dependencies
+    implementation 'org.springframework.boot:spring-boot-starter-web'
+    implementation 'org.springframework.boot:spring-boot-starter-actuator'
+    compileOnly 'org.projectlombok:lombok:1.18.32'
+    annotationProcessor 'org.projectlombok:lombok:1.18.32'
+
+    // runtime dependencies
+    runtimeOnly 'org.springframework.boot:spring-boot-devtools'
+
+    // dependencies for test-execution
+    testImplementation 'io.gatling.highcharts:gatling-charts-highcharts:3.10.5'
+}
+
+test {
+    useJUnitPlatform {
+        includeEngines 'junit-jupiter'
+    }
+    failFast = true
+    testLogging {
+        events "passed", "skipped", "failed"
+        exceptionFormat "full"
+    }
+}
+
+tasks.withType(ScalaCompile) {
+    scalaCompileOptions.forkOptions.with {
+        jvmArgs = ['-Xss100m'] // Scala compiler may require a larger stack size when compiling Gatling simulations
+    }
+}
